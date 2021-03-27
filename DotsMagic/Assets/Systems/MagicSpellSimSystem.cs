@@ -15,8 +15,21 @@ public class MagicSpellSimSystem : SystemBase
 	{
 		base.OnCreate();
 
-        ecbSource = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        ecbSource = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
     }
+
+
+
+
+
+
+    public static void ProcessUpdateEntity(Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent, EntityCommandBuffer.ParallelWriter parallelWriterECB, in float deltatime)
+	{
+        SpellDataComponent newSpellComponent = spellComponent;
+        newSpellComponent.splPosition += deltatime * newSpellComponent.splVelocity;
+        parallelWriterECB.SetComponent<SpellDataComponent>(entityInQueryIndex, entity, newSpellComponent);
+    }
+
 
     protected override void OnUpdate()
     {
@@ -40,9 +53,7 @@ public class MagicSpellSimSystem : SystemBase
             .ForEach(
             (Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent) =>
                 {
-                    SpellDataComponent newSpellComponent = spellComponent;
-                    newSpellComponent.splPosition += deltatime * newSpellComponent.splVelocity;
-                    parallelWriterECB.SetComponent<SpellDataComponent>(entityInQueryIndex, entity, newSpellComponent);
+                    ProcessUpdateEntity(entity, entityInQueryIndex, spellComponent, parallelWriterECB, deltatime);//TODO: probably don't need a lamda here, probably can just pass the function itself yeah?
                 }
             ).ScheduleParallel();
 

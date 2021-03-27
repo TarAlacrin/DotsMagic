@@ -8,6 +8,8 @@ public struct SpellDataComponent : IComponentData
 {
     public float3 splPosition;//should All these be seperate components? :thinking:
     public quaternion splRotaiton;
+    public float3 splScale;
+
     public float3 splVelocity;
      
     public float splCastTimeStart;
