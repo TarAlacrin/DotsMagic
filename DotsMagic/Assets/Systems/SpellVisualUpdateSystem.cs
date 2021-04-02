@@ -21,21 +21,20 @@ public class SpellVisualUpdateSystem : SystemBase
         ecbSource = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
         rendermesh = Resources.Load<Mesh>("trifbx");
         rendermaterial = Resources.Load<Material>("Materials/DefaultSpellBlu");
-
     }
 
     protected override void OnUpdate()
     {
         EntityCommandBuffer.ParallelWriter parallelWriterECB = ecbSource.CreateCommandBuffer().AsParallelWriter();
-
+        
         Entities
             .ForEach(
             (Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent, in Translation translation, in Rotation rotation, in Scale scale) =>
             {
                 UpdateComponentData(entity, entityInQueryIndex, spellComponent, translation, rotation, scale, ref parallelWriterECB);
             }).ScheduleParallel();
-
-
+        
+        
         ecbSource.AddJobHandleForProducer(this.Dependency);
     }
 
