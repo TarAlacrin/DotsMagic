@@ -43,9 +43,10 @@ unsafe public class SpellCastSystem : SystemBase
 			ecb.AddComponent<SpellDataComponent>(spellEntity, splData);
 			ecb.AddComponent<SpellRootComponent>(spellEntity);
 
-
 			EntityManager.SetComponentData(spellEntity, new Translation { Value = camPos });
 			EntityManager.SetComponentData(spellEntity, new Rotation { Value = camRot });
+			DynamicBuffer<SpellUpdateInstructionBuffElem> dynBuffer = EntityManager.AddBuffer<SpellUpdateInstructionBuffElem>(spellEntity);
+			dynBuffer.Add(new SpellUpdateInstructionBuffElem() { spellWordLink = SpellWordNamespace.SpellWordEnum.AccellerateSpellForward });
 		}
 	}
 }

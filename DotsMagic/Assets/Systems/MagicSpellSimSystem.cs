@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public class MagicSpellSimSystem : SystemBase
+unsafe public class MagicSpellSimSystem : SystemBase
 {
 
     private EntityCommandBufferSystem ecbSource;
@@ -18,16 +18,20 @@ public class MagicSpellSimSystem : SystemBase
         ecbSource = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
     }
 
+    public static void ProcessUpdate(Entity entity, int entityInQueryIndex, SpellWordNamespace.SpellWordEnum instructionElement, EntityCommandBuffer.ParallelWriter parallelWriterECB, in float deltatime)
+    {
+        object[] invokeParams = new object[] { entity, entityInQueryIndex, parallelWriterECB, null, deltatime };
+        SpellWordNamespace.SpellWords.spellWordArray[(int)instructionElement].Invoke(null, invokeParams);
+    } 
 
 
 
-
-
-    public static void ProcessUpdateEntity(Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent, EntityCommandBuffer.ParallelWriter parallelWriterECB, in float deltatime)
+    public static void ProcessUpdateEntity(Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent, EntityCommandBuffer.ParallelWriter parallelWriterECB, in DynamicBuffer<SpellUpdateInstructionBuffElem> updateInstructions, in float deltatime)
 	{
-        SpellDataComponent newSpellComponent = spellComponent;
-        newSpellComponent.splPosition += deltatime * newSpellComponent.splVelocity;
-        parallelWriterECB.SetComponent<SpellDataComponent>(entityInQueryIndex, entity, newSpellComponent);
+        //SpellDataComponent newSpellComponent = spellComponent;
+        //newSpellComponent.splPosition += deltatime * newSpellComponent.splVelocity;
+        //parallelWriterECB.SetComponent<SpellDataComponent>(entityInQueryIndex, entity, newSpellComponent);
+
     }
 
 
@@ -51,12 +55,23 @@ public class MagicSpellSimSystem : SystemBase
         Entities
             .WithAll<SpellRootComponent>()
             .ForEach(
-            (Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent) =>
+            (Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent, in DynamicBuffer<SpellUpdateInstructionBuffElem> updateInstructions) =>
                 {
-                    ProcessUpdateEntity(entity, entityInQueryIndex, spellComponent, parallelWriterECB, deltatime);//TODO: probably don't need a lamda here, probably can just pass the function itself yeah?
+                    object[] invokeParams = new object[] { entity, entityInQueryIndex, parallelWriterECB, this, deltatime };
+
+                    foreach (var instruction in updateInstructions)
+                    {
+                        SpellWordNamespace.SpellWords.spellWordArray[(int)instruction.spellWordLink].Invoke(null, invokeParams);
+                    }
                 }
             ).ScheduleParallel();
 
         ecbSource.AddJobHandleForProducer(this.Dependency);
     }
+
+
+    public T GetSpellComponent<T>(Entity spellEntity) where T : struct, IComponentData
+    {
+        return GetComponent<T>(spellEntity);
+	}
 }

@@ -29,8 +29,6 @@ public class CameraTrackerAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     // For example,
     //    public float scale;
 
-
-
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         // Call methods on 'dstManager' to create runtime components on 'entity' here. Remember that:
@@ -89,7 +87,6 @@ class PlayerCameraSystem : SystemBase
 
 	protected override void OnUpdate()
 	{
-
         if(cameraComp.CameraEntity == Entity.Null)
 		{
             MoveDataToSingleton();
