@@ -35,19 +35,19 @@ public static class SpellWordsEnumGenerator
         //WriteCodeFile();
     }
 
-    [MenuItem("Build/Generate Spell Word Code")]
+    //[MenuItem("Build/Generate Spell Word Code")]// TODO: RENABLE
     static void GenerateSpellWords()
 	{
         _methodInfos = GetAllSpellWords();
-        WriteCodeFile();
+        //WriteCodeFile();//TODO: RENABLE
         Debug.Log("Spell word code generated and saved. Total Methods Processed = " + _methodInfos.Count());
     }
 
-    [MenuItem("Build/CLEAR Current Spell Word Code")]
+    //[MenuItem("Build/CLEAR Current Spell Word Code")]// TODO: RENABLE
     static void ClearGeneratedCode()
 	{
         _methodInfos = GetAllSpellWords();
-        WriteCodeFile(false );
+        //WriteCodeFile(false );// TODO: RENABLE
         Debug.Log("Cleared the generated spell word code. Total Methods Processed = " + _methodInfos.Count());
     }
 
@@ -129,7 +129,7 @@ public static class SpellWordsEnumGenerator
         // if the time delta between now and the last change, is greater than the time we schould wait Than write the file
         if (EditorApplication.timeSinceStartup - _startTime > _timeToWait)
         {
-            WriteCodeFile();
+           // WriteCodeFile();
             _hasChanged = false;
         }
     }
@@ -169,7 +169,10 @@ public static class SpellWordsEnumGenerator
     {
         string toreturn = para.ParameterType.FullName + " " + para.Name;
 
+        bool isRef = toreturn.Contains('&');
+
         toreturn = toreturn.Replace("&", "");
+        toreturn = toreturn.Replace('+', '.');
 
         if (para.IsIn)
         {
@@ -180,6 +183,8 @@ public static class SpellWordsEnumGenerator
         }
         else if(para.IsOut)
             toreturn = "out " + toreturn;
+        else if(isRef)
+            toreturn = "ref " + toreturn;
 
         return toreturn;
     }
@@ -263,7 +268,7 @@ public static class SpellWordsEnumGenerator
                     }
 
                     builder.AppendLine("\t\tpublic static MethodInfo[] spellWordArray = {");
-                    Debug.Log("HELP = " + writeDelegateDictionary);
+
                     if(writeDelegateDictionary)
 					{
                         foreach (MethodInfo methodInfo in _methodInfos)
@@ -276,7 +281,7 @@ public static class SpellWordsEnumGenerator
                     builder.AppendLine("\t}");
 
                     builder.AppendLine("}");
-                    writer.Write(builder.ToString());
+                    //TODO: RENABLE : writer.Write(builder.ToString());
                 }
             }
         }

@@ -4,24 +4,27 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using System.Reflection;
+using System;
+using System.Runtime.InteropServices;
 
 unsafe public class MagicSpellSimSystem : SystemBase
 {
-
+    public static MagicSpellSimSystem inst;
     private EntityCommandBufferSystem ecbSource;
 
 
 	protected override void OnCreate()
 	{
 		base.OnCreate();
-
+        MagicSpellSimSystem.inst = this;
         ecbSource = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
     }
 
     public static void ProcessUpdate(Entity entity, int entityInQueryIndex, SpellWordNamespace.SpellWordEnum instructionElement, EntityCommandBuffer.ParallelWriter parallelWriterECB, in float deltatime)
     {
-        object[] invokeParams = new object[] { entity, entityInQueryIndex, parallelWriterECB, null, deltatime };
-        SpellWordNamespace.SpellWords.spellWordArray[(int)instructionElement].Invoke(null, invokeParams);
+        //object[] invokeParams = new object[] { entity, entityInQueryIndex, parallelWriterECB, null, deltatime };
+        //SpellWordNamespace.SpellWords.spellWordArray[(int)instructionElement].Invoke(null, invokeParams);
     } 
 
 
@@ -52,16 +55,17 @@ unsafe public class MagicSpellSimSystem : SystemBase
         // Translation and Rotation components. Change it to process the component
         // types you want.
         float deltatime = Time.DeltaTime;
+
         Entities
             .WithAll<SpellRootComponent>()
             .ForEach(
             (Entity entity, int entityInQueryIndex, in SpellDataComponent spellComponent, in DynamicBuffer<SpellUpdateInstructionBuffElem> updateInstructions) =>
                 {
-                    object[] invokeParams = new object[] { entity, entityInQueryIndex, parallelWriterECB, this, deltatime };
+                    //object[] invokeParams = new object[] { entity, entityInQueryIndex, parallelWriterECB, deltatime };
 
                     foreach (var instruction in updateInstructions)
                     {
-                        SpellWordNamespace.SpellWords.spellWordArray[(int)instruction.spellWordLink].Invoke(null, invokeParams);
+                        SpellWordNamespace.SpellWords.spellWordDelArray[(int)instruction.spellWordLink](ref entity, entityInQueryIndex, ref parallelWriterECB, deltatime);
                     }
                 }
             ).ScheduleParallel();

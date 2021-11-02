@@ -52,8 +52,8 @@ public class CameraTrackerAuthoring : MonoBehaviour, IConvertGameObjectToEntity
     }
 }
 
-
-[UpdateBefore(typeof(TRSToLocalToWorldSystem))]
+[UpdateInGroup(typeof(TransformSystemGroup))] 
+//[UpdateBefore(typeof(TRSToLocalToWorldSystem))]
 class PlayerCameraSystem : SystemBase
 {
     public static Transform currentPlayerCamera;
@@ -65,7 +65,7 @@ class PlayerCameraSystem : SystemBase
         {
             if(entities.Length == 0)
 			{
-                Debug.LogError("TRYING TO MOVE DATA BUT NO ENTITIES FOUND WITH TRACKING COMPONENT");
+                Debug.LogWarning("TRYING TO MOVE DATA BUT NO ENTITIES FOUND WITH TRACKING COMPONENT");
                 return;
 			}
 
